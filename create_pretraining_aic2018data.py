@@ -231,9 +231,9 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   print('===================')
   print('===================')
   print('===================')
-  # print(all_documents)
-  # print(len(all_documents))
-  # exit()
+  print(all_documents)
+  print(len(all_documents))
+  exit()
   rng.shuffle(all_documents)
 
   vocab_words = list(tokenizer.vocab.keys())
