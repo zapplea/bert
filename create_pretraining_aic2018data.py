@@ -22,6 +22,7 @@ import collections
 import random
 import tokenization
 import tensorflow as tf
+import pandas as pd
 
 flags = tf.flags
 
@@ -171,6 +172,25 @@ def create_float_feature(values):
   feature = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
   return feature
 
+def prepare_corpus(config):
+  rootpath = config['corpus']['corpus_path']
+  files_name = [f for f in listdir(rootpath) if isfile(join(rootpath, f))]
+  corpus = []
+  # TODO: convert long word to #OTHER#
+  for fname in files_name:
+    data = pd.read_pickle(join(rootpath, fname))[:, 1]
+    for review in data:
+      for sentence in review:
+        sentence = sentence.split(' ')
+        for i in range(len(sentence)):
+          word = sentence[i]
+          if len(list(word)) > config['corpus']['max_word_len']:
+            sentence[i] = config['corpus']['OTHER']
+        corpus.append(sentence)
+  print('corpus length: ', len(corpus))
+  print('sample:\n', corpus[77])
+  with open(join(rootpath, config['corpus']['corpus_name']), 'wb') as f:
+    pickle.dump(corpus, f)
 
 def create_training_instances(input_files, tokenizer, max_seq_length,
                               dupe_factor, short_seq_prob, masked_lm_prob,
@@ -184,6 +204,13 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   # sentence boundaries for the "next sentence prediction" task).
   # (2) Blank lines between documents. Document boundaries are needed so
   # that the "next sentence prediction" task doesn't span between documents.
+
+  # for input_file in input_files:
+  #   data = pd.read_pickle(input_file)[:, 1]
+  #   for review in data:
+  #     for sentence in review:
+  #       all_documents[-1].append(sentence)
+  #     all_documents.append([])
   for input_file in input_files:
     with tf.gfile.GFile(input_file, "r") as reader:
       while True:
@@ -198,7 +225,6 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
         tokens = tokenizer.tokenize(line)
         if tokens:
           all_documents[-1].append(tokens)
-
   # Remove empty documents
   all_documents = [x for x in all_documents if x]
   print('===================')
