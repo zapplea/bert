@@ -200,6 +200,7 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
     data = pd.read_pickle(input_file)[:, 1]
     for review in data:
       for sentence in review:
+        sentence = sentence.split()
         # Fixed: the tokenize is from which? Don't need tokenize, because it just tokenize the text without adding other informations
         # tokens = tokenizer.tokenize(sentence)
         sentence = check_unk(sentence,tokenizer)
@@ -420,6 +421,7 @@ def create_vocab(vocab_file,input_files):
     data = pd.read_pickle(input_file)[:, 1]
     for review in data:
       for sentence in review:
+        sentence=sentence.split()
         for token in sentence:
           token = token.lower()
           if token not in vocab_set:
@@ -427,8 +429,8 @@ def create_vocab(vocab_file,input_files):
               continue
             vocab_set.add(token)
             vocab.append(token)
-  print(vocab)
-  exit()
+      print(vocab)
+      exit()
   with open(vocab_file,'w+') as f:
     for token in vocab:
       f.write(token+'\n')
