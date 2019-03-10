@@ -163,6 +163,7 @@ class FullTokenizer(object):
 
   def __init__(self, vocab_file, do_lower_case=True):
     self.vocab = load_vocab(vocab_file)
+    # TODO: research on how does it works
     self.inv_vocab = {v: k for k, v in self.vocab.items()}
     self.basic_tokenizer = BasicTokenizer(do_lower_case=do_lower_case)
     self.wordpiece_tokenizer = WordpieceTokenizer(vocab=self.vocab)
@@ -305,7 +306,7 @@ class WordpieceTokenizer(object):
     self.unk_token = unk_token
     self.max_input_chars_per_word = max_input_chars_per_word
 
-  def tokenize(self, text):
+  def tokenize(self, tokens):
     """Tokenizes a piece of text into its word pieces.
 
     This uses a greedy longest-match-first algorithm to perform tokenization
@@ -323,10 +324,8 @@ class WordpieceTokenizer(object):
       A list of wordpiece tokens.
     """
 
-    text = convert_to_unicode(text)
-
     output_tokens = []
-    for token in whitespace_tokenize(text):
+    for token in tokens:
       chars = list(token)
       if len(chars) > self.max_input_chars_per_word:
         output_tokens.append(self.unk_token)

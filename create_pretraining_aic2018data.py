@@ -42,6 +42,8 @@ flags.DEFINE_bool(
     "do_lower_case", True,
     "Whether to lower case the input text. Should be True for uncased "
     "models and False for cased models.")
+flags.DEFINE_bool('is_create_vocab',False,
+                  'Whether to create vocabulary file')
 
 flags.DEFINE_integer("max_seq_length", 128, "Maximum sequence length.")
 
@@ -172,25 +174,14 @@ def create_float_feature(values):
   feature = tf.train.Feature(float_list=tf.train.FloatList(value=list(values)))
   return feature
 
-def prepare_corpus(config):
-  rootpath = config['corpus']['corpus_path']
-  files_name = [f for f in listdir(rootpath) if isfile(join(rootpath, f))]
-  corpus = []
-  # TODO: convert long word to #OTHER#
-  for fname in files_name:
-    data = pd.read_pickle(join(rootpath, fname))[:, 1]
-    for review in data:
-      for sentence in review:
-        sentence = sentence.split(' ')
-        for i in range(len(sentence)):
-          word = sentence[i]
-          if len(list(word)) > config['corpus']['max_word_len']:
-            sentence[i] = config['corpus']['OTHER']
-        corpus.append(sentence)
-  print('corpus length: ', len(corpus))
-  print('sample:\n', corpus[77])
-  with open(join(rootpath, config['corpus']['corpus_name']), 'wb') as f:
-    pickle.dump(corpus, f)
+def check_unk(sentence,tokenizer):
+  vocab = set(tokenizer.vocab.keys())
+  for i in range(len(sentence)):
+    word = sentence[i]
+    if word not in vocab:
+      sentence[i]='[UNK]'
+  return sentence
+
 
 def create_training_instances(input_files, tokenizer, max_seq_length,
                               dupe_factor, short_seq_prob, masked_lm_prob,
@@ -205,35 +196,17 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   # (2) Blank lines between documents. Document boundaries are needed so
   # that the "next sentence prediction" task doesn't span between documents.
 
-  # for input_file in input_files:
-  #   data = pd.read_pickle(input_file)[:, 1]
-  #   for review in data:
-  #     for sentence in review:
-  #       all_documents[-1].append(sentence)
-  #     all_documents.append([])
   for input_file in input_files:
-    with tf.gfile.GFile(input_file, "r") as reader:
-      while True:
-        line = tokenization.convert_to_unicode(reader.readline())
-        if not line:
-          break
-        line = line.strip()
-
-        # Empty lines are used as document delimiters
-        if not line:
-          all_documents.append([])
-        tokens = tokenizer.tokenize(line)
-        if tokens:
-          all_documents[-1].append(tokens)
+    data = pd.read_pickle(input_file)[:, 1]
+    for review in data:
+      for sentence in review:
+        # Fixed: the tokenize is from which? Don't need tokenize, because it just tokenize the text without adding other informations
+        # tokens = tokenizer.tokenize(sentence)
+        sentence = check_unk(sentence,tokenizer)
+        all_documents[-1].append(sentence)
+      all_documents.append([])
   # Remove empty documents
   all_documents = [x for x in all_documents if x]
-  print('===================')
-  print('===================')
-  print('===================')
-  print('===================')
-  print(all_documents)
-  print(len(all_documents))
-  exit()
   rng.shuffle(all_documents)
 
   vocab_words = list(tokenizer.vocab.keys())
@@ -438,16 +411,43 @@ def truncate_seq_pair(tokens_a, tokens_b, max_num_tokens, rng):
     else:
       trunc_tokens.pop()
 
+def create_vocab(vocab_file,input_files):
+  #DONE: lower token when create vocab
+  vocab = ['[PAD]','[CLS]','[SEP]','[MASK]','[UNK]']
+  vocab_set = set(vocab)
+  for input_file in input_files:
+    data = pd.read_pickle(input_file)[:, 1]
+    for review in data:
+      for sentence in review:
+        for token in sentence:
+          token = token.lower()
+          if token not in vocab_set:
+            if list(token)>20:
+              continue
+            vocab_set.add(token)
+            vocab.append(token)
+  with open(vocab_file,'w+') as f:
+    for token in vocab:
+      f.write(token+'\n')
 
-def main(_):
+def main():
+  #TODO: account the max review length.(how many words in a review)
+  #DONE: how to process the pad word? the vocab file should influde the '#PAD#' as first element.Since the program append 0 at the end of short sequence.
   tf.logging.set_verbosity(tf.logging.INFO)
-
-  tokenizer = tokenization.FullTokenizer(
-      vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
-
   input_files = []
   for input_pattern in FLAGS.input_file.split(","):
     input_files.extend(tf.gfile.Glob(input_pattern))
+  # TODO: create vocabulary
+  # TODO: save the word embedding after each epoch
+  print(input_files)
+  if FLAGS.is_create_vocab:
+    print('generate vocab at: \n%s'%FLAGS.vocab_file)
+    create_vocab(vocab_file=FLAGS.vocab_file,input_files=input_files)
+  exit()
+  tokenizer = tokenization.FullTokenizer(
+      vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
+
+
 
   tf.logging.info("*** Reading from input files ***")
   for input_file in input_files:
@@ -458,8 +458,6 @@ def main(_):
       input_files, tokenizer, FLAGS.max_seq_length, FLAGS.dupe_factor,
       FLAGS.short_seq_prob, FLAGS.masked_lm_prob, FLAGS.max_predictions_per_seq,
       rng)
-  print(instances)
-  exit()
   output_files = FLAGS.output_file.split(",")
   tf.logging.info("*** Writing to output files ***")
   for output_file in output_files:
@@ -473,4 +471,5 @@ if __name__ == "__main__":
   flags.mark_flag_as_required("input_file")
   flags.mark_flag_as_required("output_file")
   flags.mark_flag_as_required("vocab_file")
+  flags.mark_flag_as_required("is_create_vocab")
   tf.app.run()
