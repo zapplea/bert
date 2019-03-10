@@ -440,11 +440,10 @@ def main(_):
   for input_pattern in FLAGS.input_file.split(","):
     print(input_pattern)
     # input_files.extend(tf.gfile.Glob(input_pattern))
-    input_files.extend(input_pattern)
+    input_files.extend([input_pattern])
   # TODO: create vocabulary
   # TODO: save the word embedding after each epoch
   print('input files list: ',input_files)
-  exit()
   if FLAGS.is_create_vocab:
     print('generate vocab at: \n%s'%FLAGS.vocab_file)
     create_vocab(vocab_file=FLAGS.vocab_file,input_files=input_files)
