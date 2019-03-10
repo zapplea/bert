@@ -417,6 +417,7 @@ def create_vocab(vocab_file,input_files):
   vocab_set = set(vocab)
   for input_file in input_files:
     data = pd.read_pickle(input_file)[:, 1]
+    print(data)
     exit()
     for review in data:
       for sentence in review:
