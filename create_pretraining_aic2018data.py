@@ -196,10 +196,13 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   # (2) Blank lines between documents. Document boundaries are needed so
   # that the "next sentence prediction" task doesn't span between documents.
 
+  print('in creating training instances')
   for input_file in input_files:
     data = pd.read_pickle(input_file)[:, 1]
     for review in data:
+      print(review)
       for sentence in review:
+        print(sentence)
         sentence = sentence.split()
         # Fixed: the tokenize is from which? Don't need tokenize, because it just tokenize the text without adding other informations
         # tokens = tokenizer.tokenize(sentence)
@@ -462,10 +465,12 @@ def main(_):
     tf.logging.info("  %s", input_file)
 
   rng = random.Random(FLAGS.random_seed)
+  print('creat instances ...')
   instances = create_training_instances(
       input_files, tokenizer, FLAGS.max_seq_length, FLAGS.dupe_factor,
       FLAGS.short_seq_prob, FLAGS.masked_lm_prob, FLAGS.max_predictions_per_seq,
       rng)
+  print('Done!')
   output_files = FLAGS.output_file.split(",")
   tf.logging.info("*** Writing to output files ***")
   for output_file in output_files:
