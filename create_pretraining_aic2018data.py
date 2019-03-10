@@ -209,8 +209,8 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
         sentence = check_unk(sentence,tokenizer)
         all_documents[-1].append(sentence)
       all_documents.append([])
-    print(all_documents)
-    exit()
+      print(all_documents)
+      exit()
   # Remove empty documents
   all_documents = [x for x in all_documents if x]
   print('all documents smaple: ',all_documents[-999])
