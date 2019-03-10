@@ -419,8 +419,12 @@ def create_vocab(vocab_file,input_files):
   for input_file in input_files:
     data = pd.read_pickle(input_file)[:, 1]
     for review in data:
+      print('review: ',review)
       for sentence in review:
+        print('sentence: ',sentence)
         for token in sentence:
+          print('token: ',token)
+          exit()
           token = token.lower()
           if token not in vocab_set:
             if len(list(token))>20:
