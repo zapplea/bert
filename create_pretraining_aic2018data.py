@@ -422,7 +422,7 @@ def create_vocab(vocab_file,input_files):
         for token in sentence:
           token = token.lower()
           if token not in vocab_set:
-            if list(token)>20:
+            if len(list(token))>20:
               continue
             vocab_set.add(token)
             vocab.append(token)
