@@ -415,6 +415,7 @@ def create_vocab(vocab_file,input_files):
   #DONE: lower token when create vocab
   vocab = ['[PAD]','[CLS]','[SEP]','[MASK]','[UNK]']
   vocab_set = set(vocab)
+  print('Create Vocab ...')
   for input_file in input_files:
     data = pd.read_pickle(input_file)[:, 1]
     for review in data:
