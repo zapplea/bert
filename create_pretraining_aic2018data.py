@@ -208,6 +208,9 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
       all_documents.append([])
   # Remove empty documents
   all_documents = [x for x in all_documents if x]
+  print(all_documents[77])
+  print('all documents length: ',len(all_documents))
+  exit()
   rng.shuffle(all_documents)
 
   vocab_words = list(tokenizer.vocab.keys())
@@ -447,7 +450,7 @@ def main(_):
   if FLAGS.is_create_vocab:
     print('generate vocab at: \n%s'%FLAGS.vocab_file)
     create_vocab(vocab_file=FLAGS.vocab_file,input_files=input_files)
-  exit()
+
   tokenizer = tokenization.FullTokenizer(
       vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
 
