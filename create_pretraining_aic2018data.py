@@ -430,7 +430,7 @@ def create_vocab(vocab_file,input_files):
     for token in vocab:
       f.write(token+'\n')
 
-def main():
+def main(_):
   #TODO: account the max review length.(how many words in a review)
   #DONE: how to process the pad word? the vocab file should influde the '#PAD#' as first element.Since the program append 0 at the end of short sequence.
   tf.logging.set_verbosity(tf.logging.INFO)
