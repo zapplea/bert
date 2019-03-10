@@ -429,8 +429,6 @@ def create_vocab(vocab_file,input_files):
               continue
             vocab_set.add(token)
             vocab.append(token)
-      print(vocab)
-      exit()
   with open(vocab_file,'w+') as f:
     for token in vocab:
       f.write(token+'\n')
