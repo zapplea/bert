@@ -195,22 +195,16 @@ def create_training_instances(input_files, tokenizer, max_seq_length,
   # sentence boundaries for the "next sentence prediction" task).
   # (2) Blank lines between documents. Document boundaries are needed so
   # that the "next sentence prediction" task doesn't span between documents.
-
-  print('in creating training instances')
   for input_file in input_files:
     data = pd.read_pickle(input_file)[:, 1]
     for review in data:
-      print(review)
       for sentence in review:
-        print(sentence)
         sentence = sentence.split()
         # Fixed: the tokenize is from which? Don't need tokenize, because it just tokenize the text without adding other informations
         # tokens = tokenizer.tokenize(sentence)
         sentence = check_unk(sentence,tokenizer)
         all_documents[-1].append(sentence)
       all_documents.append([])
-      print(all_documents)
-      exit()
   # Remove empty documents
   all_documents = [x for x in all_documents if x]
   print('all documents smaple: ',all_documents[-999])
