@@ -417,6 +417,7 @@ def create_vocab(vocab_file,input_files):
   vocab_set = set(vocab)
   for input_file in input_files:
     data = pd.read_pickle(input_file)[:, 1]
+    exit()
     for review in data:
       for sentence in review:
         for token in sentence:
@@ -437,8 +438,8 @@ def main(_):
   input_files = []
   for input_pattern in FLAGS.input_file.split(","):
     print(input_pattern)
-    input_files.extend(tf.gfile.Glob(input_pattern))
-    # input_files.extend(input_pattern)
+    # input_files.extend(tf.gfile.Glob(input_pattern))
+    input_files.extend(input_pattern)
   # TODO: create vocabulary
   # TODO: save the word embedding after each epoch
   print(input_files)
