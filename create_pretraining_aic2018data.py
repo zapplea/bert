@@ -438,6 +438,7 @@ def main(_):
   for input_pattern in FLAGS.input_file.split(","):
     print(input_pattern)
     input_files.extend(tf.gfile.Glob(input_pattern))
+    # input_files.extend(input_pattern)
   # TODO: create vocabulary
   # TODO: save the word embedding after each epoch
   print(input_files)
